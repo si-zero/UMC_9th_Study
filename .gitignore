@@ -1,0 +1,6 @@
+# dependency directories
+node_modules/
+
+# 환경 변수 관련 파일
+.env
+.env.*
