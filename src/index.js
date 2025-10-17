@@ -4,6 +4,7 @@ import cors from 'cors';
 import { requestUserRegister } from "./controllers/user.controller.js";
 import { getStoreController, createStoreController } from "./controllers/store.controller.js";
 import { getReviewsController, createReviewController } from "./controllers/review.controller.js";
+import { createMissionController, getMissionsController } from "./controllers/mission.controller.js";
 
 dotenv.config();
 
@@ -28,6 +29,10 @@ app.get("/store/:id", getStoreController);
 // 리뷰 생성 및 조회
 app.post("/stores/:storeId/reviews", createReviewController);
 app.get("/stores/:storeId/reviews", getReviewsController);
+
+// 미션 생성 및 조회
+app.post("/missions", createMissionController);
+app.get("/missions", getMissionsController);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
