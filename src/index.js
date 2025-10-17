@@ -3,6 +3,7 @@ import express from "express";
 import cors from 'cors';
 import { requestUserRegister } from "./controllers/user.controller.js";
 import { getStoreController, createStoreController } from "./controllers/store.controller.js";
+import { getReviewsController, createReviewController } from "./controllers/review.controller.js";
 
 dotenv.config();
 
@@ -20,8 +21,13 @@ app.get("/", (req, res) => {
 
 app.post("/api/user/register", requestUserRegister);
 
+// 가게 생성 및 조회
 app.post("/store", createStoreController);
 app.get("/store/:id", getStoreController);
+
+// 리뷰 생성 및 조회
+app.post("/stores/:storeId/reviews", createReviewController);
+app.get("/stores/:storeId/reviews", getReviewsController);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
