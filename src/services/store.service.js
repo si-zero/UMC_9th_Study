@@ -13,5 +13,5 @@ export const createStoreService = async (body) => {
 export const getStoreService = async (store_id) => {
   const store = await findStoreById(store_id);
   if (!store) throw new Error("존재하지 않는 가게입니다.");
-  return responseFromStore(store);
+  return responseFromStore(store[0]);
 };
