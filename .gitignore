@@ -4,3 +4,6 @@ node_modules/
 # 환경 변수 관련 파일
 .env
 .env.*
+
+# 기타 파일
+.DS_Store
