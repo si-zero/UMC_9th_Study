@@ -13,3 +13,10 @@ export const bodyToUser = (body) => {
     favoriteFoods: body.favoriteFoods || [], 
   };
 };
+
+export const responseFromUser = (body) => {
+  return {
+    name: body.name, // 필수
+    nickname: body.nickname || body.name, // 선택
+  }
+}

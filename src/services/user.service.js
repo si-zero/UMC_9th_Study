@@ -1,5 +1,5 @@
-import { responseFromUser } from "~/dtos/user.dto.js";
-import { addUser, getUser, getUserPreferencesByUserId, setPreference, } from "~/repositories/user.repository.js";
+//import { responseFromUser } from "../dtos/user.dto.js";
+import { addUser, getUser, getUserFavoriteFoodByUserId, setFavoriteId, } from "../repositories/user.repository.js";
 
 export const userSignUp = async (data) => {
   const joinUserId = await addUser({
@@ -18,11 +18,11 @@ export const userSignUp = async (data) => {
     throw new Error("이미 존재하는 이메일입니다.");
   }
 
-  for (const preference of data.preferences) {
-    await setPreference(joinUserId, preference);
+  for (const favorite_id of data.favorite_id) {
+    await setFavoriteId(joinUserId, favorite_id);
   }
 
   const user = await getUser(joinUserId);
-  const preferences = await getUserPreferencesByUserId(joinUserId);
-  return responseFromUser({ user, preferences });
+  const favorite_food = await getUserFavoriteFoodByUserId(joinUserId);
+  return responseFromUser({ user, favorite_id });
 };
