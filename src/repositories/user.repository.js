@@ -1,107 +1,61 @@
 import { db } from "../db.config.js";
 
-// User 데이터 삽입
-export const addUser = async (data) => {
+// 1. 유저 생성
+export const createUser = async (userData) => {
   const conn = await db.getConnection();
-
   try {
-    const [confirm] = await db.query(
-      `SELECT EXISTS(SELECT 1 FROM user WHERE email = ?) as isExistEmail;`,
-      data.email
-    );
-
-    if (confirm[0].isExistEmail) {
-      return null;
-    }
-
-    const [result] = await db.query(
-      `INSERT INTO user (name, nickname, email, role, point, gender, phone_number, date, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+    // DB의 created_at, updated_at 필드는 보통 DB DEFAULT나 Service에서 처리합니다.
+    // 여기서는 Service에서 날짜를 넘겨준다고 가정하고 코드를 작성합니다.
+    const [result] = await conn.query(
+      `INSERT INTO user (name, nickname, email, password, role, gender, date, address, point, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
-        data.name,
-        data.nickname,
-        data.email,
-        data.role,
-        data.point,
-        data.gender,
-        data.phoneNumber,
-        data.date,
-        data.address,
-        data.phoneNumber,
-        data.status,
+        userData.name, 
+        userData.nickname, 
+        userData.email, 
+        userData.password, // Service 레이어에서 이미 해싱된 값
+        userData.role || 'USER', 
+        userData.gender, 
+        userData.date, 
+        userData.address,
+        userData.point || 0, // 기본 포인트 0
+        userData.created_at, 
+        userData.updated_at
       ]
     );
-
-    return result.insertId;
-  } catch (err) {
-    throw new Error(
-      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
-    );
-  } finally {
-    conn.release();
+    // 생성된 유저의 user_id를 반환
+    return result.insertId; 
+  } finally { 
+    conn.release(); 
   }
 };
 
-// 사용자 정보 얻기
-export const getUser = async (userId) => {
+// 2. 유저 조회 (user_id)
+export const findUserById = async (user_id) => {
   const conn = await db.getConnection();
-
   try {
-    const [user] = await db.query(`SELECT * FROM user WHERE user_id = ?;`, userId);
-
-    console.log(user);
-
-    if (user.length == 0) {
-      return null;
-    }
-
-    return user;
-  } catch (err) {
-    throw new Error(
-      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+    const [rows] = await conn.query(
+      `SELECT * FROM user WHERE user_id = ?;`, 
+      [user_id]
     );
-  } finally {
-    conn.release();
+    return rows.length > 0 ? rows[0] : null; 
+  } finally { 
+    conn.release(); 
   }
 };
 
-// 음식 선호 카테고리 매핑
-export const setFavoriteId = async (userId, foodCategoryId) => {
+// 3. 포인트 업데이트
+export const updateUserPoint = async (user_id, point_change) => {
   const conn = await db.getConnection();
-
   try {
-    await db.query(
-      `INSERT INTO favorite_food (category_id, user_id) VALUES (?, ?);`,
-      [foodCategoryId, userId]
+    const [result] = await conn.query(
+      `UPDATE user 
+       SET point = point + ?, updated_at = ?
+       WHERE user_id = ?;`,
+      [point_change, new Date(), user_id]
     );
-
-    return;
-  } catch (err) {
-    throw new Error(
-      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
-    );
-  } finally {
-    conn.release();
-  }
-};
-
-// 사용자 선호 카테고리 반환
-export const getUserFavoriteFoodByUserId = async (userId) => {
-  const conn = await db.getConnection();
-
-  try {
-    const [preferences] = await db.query(
-      "SELECT ufc.id, ufc.food_category_id, ufc.user_id, fcl.name " +
-        "FROM user_favor_category ufc JOIN food_category fcl on ufc.food_category_id = fcl.id " +
-        "WHERE ufc.user_id = ? ORDER BY ufc.food_category_id ASC;",
-      userId
-    );
-
-    return preferences;
-  } catch (err) {
-    throw new Error(
-      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
-    );
-  } finally {
-    conn.release();
+    return result.affectedRows;
+  } finally { 
+    conn.release(); 
   }
 };
