@@ -30,13 +30,27 @@ export const createUser = async (userData) => {
   }
 };
 
-// 2. 유저 조회 (user_id)
+// 2-1. 유저 조회 (user_id)
 export const findUserById = async (user_id) => {
   const conn = await db.getConnection();
   try {
     const [rows] = await conn.query(
       `SELECT * FROM user WHERE user_id = ?;`, 
       [user_id]
+    );
+    return rows.length > 0 ? rows[0] : null; 
+  } finally { 
+    conn.release(); 
+  }
+};
+
+// 2-2. 유저 조회 (email)
+export const findUserByEmail = async (user_id) => {
+  const conn = await db.getConnection();
+  try {
+    const [rows] = await conn.query(
+      `SELECT * FROM user WHERE email = ?;`, 
+      [email]
     );
     return rows.length > 0 ? rows[0] : null; 
   } finally { 
