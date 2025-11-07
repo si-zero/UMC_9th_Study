@@ -1,5 +1,5 @@
 import { createUserMission, findUserMissionByUserIdAndMissionId, updateUserMissionStatus } from "../repositories/userMission.repository.js";
-import { getUser } from "../repositories/user.repository.js";
+import { findUserById } from "../repositories/user.repository.js";
 import { findMissionById } from "../repositories/mission.repository.js"; 
 import { bodyToUserMissionRequest, bodyToUserMissionUpdate, responseFromUserMission } from "../dtos/userMission.dto.js";
 
@@ -7,7 +7,7 @@ import { bodyToUserMissionRequest, bodyToUserMissionUpdate, responseFromUserMiss
 export const addUserMissionService = async (userId, requestBody) => {
   const { mission_id } = bodyToUserMissionRequest(requestBody);
   
-  if (!await getUser(userId)) throw new Error(`존재하지 않는 사용자입니다. (ID: ${userId})`);
+  if (!await findUserById(userId)) throw new Error(`존재하지 않는 사용자입니다. (ID: ${userId})`);
   if (!await findMissionById(mission_id)) throw new Error(`존재하지 않는 미션입니다. (ID: ${mission_id})`);
   if (await findUserMissionByUserIdAndMissionId(userId, mission_id)) throw new Error("이미 할당된 미션입니다.");
 
