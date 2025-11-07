@@ -1,28 +1,42 @@
-//import { responseFromUser } from "../dtos/user.dto.js";
-import { addUser, getUser, getUserFavoriteFoodByUserId, setFavoriteId, } from "../repositories/user.repository.js";
+import * as UserRepository from '../repositories/user.repository.js';
+// import { responseFromUser } from "../dtos/user.dto.js";
 
 export const userSignUp = async (data) => {
-  const joinUserId = await addUser({
-    name: data.name, // "유시영"
-    nickname: data.nickname || data.name, // "벡스" 또는 "유시영"
-    email: data.email || "", // "snm306@naver.com" 또는 ""
-    gender: data.gender, // "남"
-    phoneNumber: data.phoneNumber, // "010-1234-1234"
-    status: data.status || "미인증", // "미인증"
-    date: data.date, // "2003-06-11"
-    address: data.address || "", // "경기도 고리울로39번길 4"
-    favorite_id: data.favorite_id || [] // [1, 2] 또는 []
-  });
+  const userDataToCreate = {
+    // 필수 필드
+    password: data.password, 
+    email: data.email, 
+    
+    // 선택 및 기본값 필드
+    name: data.name, 
+    nickname: data.nickname || data.name,
+    role: 'USER',
+    gender: data.gender,
+    date: data.date, 
+    address: data.address || "", 
+    point: 0, 
 
-  if (joinUserId === null) {
+    created_at: new Date(),
+    updated_at: new Date()
+  };
+
+  if (!userDataToCreate.email || !userDataToCreate.password) {
+      throw new Error("이메일과 비밀번호는 필수 입력 항목입니다.");
+  }
+  
+  if (await UserRepository.findUserByEmail(userDataToCreate.email)) {
     throw new Error("이미 존재하는 이메일입니다.");
   }
-
-  for (const favorite_id of data.favorite_id) {
-    await setFavoriteId(joinUserId, favorite_id);
+  
+  let joinUserId;
+  try {
+    joinUserId = await UserRepository.createUser(userDataToCreate);
+  } catch (error) {
+    console.error("사용자 생성 중 DB 오류 발생:", error);
+    throw new Error("회원가입에 실패했습니다. (DB 오류)");
   }
 
-  const user = await getUser(joinUserId);
-  const favorite_food = await getUserFavoriteFoodByUserId(joinUserId);
-  return responseFromUser({ user, favorite_id });
+  const user = await UserRepository.findUserById(joinUserId);
+  
+  return responseFromUser(user); 
 };
