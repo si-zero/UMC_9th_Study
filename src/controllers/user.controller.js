@@ -1,15 +1,15 @@
 import * as UserService from '../services/user.service.js';
-import { bodyToUserCreateDTO, bodyToUserPhoneCreateDTO } from '../dtos/user.dto.js';
+import { requestToUser, requestToUserPhone } from '../dtos/user.dto.js';
 
 // ✅ 1. POST /api/v1/users (사용자 생성/회원가입)
 export const createUser = async (req, res) => {
     try {
         // 1. DTO 변환 및 데이터 분리
-        const userDTO = bodyToUserCreateDTO(req.body);
-        const userPhoneDTO = bodyToUserPhoneCreateDTO(req.body);
+        const userDTO = requestToUser(req.body);
+        const userPhoneDTO = requestToUserPhone(req.body);
 
         // 2. Service 로직 호출
-        const finalResponse = await UserService.registerUserService(userDTO, userPhoneDTO);
+        const finalResponse = await UserService.userSignUp(userDTO, userPhoneDTO);
 
         // 3. 성공 응답
         return res.status(201).json({

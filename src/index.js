@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from 'cors';
-import { requestUserRegister } from "./controllers/user.controller.js";
+import { createUser, getUser } from "./controllers/user.controller.js";
 import { getStoreController, createStoreController } from "./controllers/store.controller.js";
 import { getReviewsController, createReviewController } from "./controllers/review.controller.js";
 import { createMissionController, getMissionsController } from "./controllers/mission.controller.js";
@@ -21,23 +21,24 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.post("/api/user/register", requestUserRegister);
+app.post("/api/v1/users", createUser);
+app.get("/api/v1/users/:user_id", getUser);
 
 // 가게 생성 및 조회
-app.post("/store", createStoreController);
-app.get("/store/:id", getStoreController);
+app.post("/api/v1/store", createStoreController);
+app.get("/api/v1/store/:id", getStoreController);
 
 // 리뷰 생성 및 조회
-app.post("/stores/:storeId/reviews", createReviewController);
-app.get("/stores/:storeId/reviews", getReviewsController);
+app.post("/api/v1/stores/:storeId/reviews", createReviewController);
+app.get("/api/v1/stores/:storeId/reviews", getReviewsController);
 
 // 미션 생성 및 조회
-app.post("/missions", createMissionController);
-app.get("/missions", getMissionsController);
+app.post("/api/v1/missions", createMissionController);
+app.get("/api/v1/missions", getMissionsController);
 
 // 사용자 미션 생성 및 업데이트
-app.post('/users/:userId/missions', addUserMissionController)
-app.patch('/users/:userId/missions/:missionId', updateUserMissionStatusController)
+app.post('/api/v1/users/:userId/missions', addUserMissionController)
+app.patch('/api/v1/users/:userId/missions/:missionId', updateUserMissionStatusController)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

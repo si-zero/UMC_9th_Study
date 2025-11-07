@@ -17,7 +17,6 @@ export const requestToUser = (body) => {
     nickname: body.nickname || body.name,
     point: body.point || 0,
     role: body.role || 'USER', // 기본값 설정
-    gender: body.gender || null, // 'M', 'F' 등
     address: body.address || "",
   };
 };
