@@ -1,30 +1,23 @@
 import { db } from "../db.config.js";
+import { prisma } from "../db.config.js";
 
 // 1. 유저 생성
 export const createUser = async (userData) => {
-  const conn = await db.getConnection();
-  try {
-    const [result] = await conn.query(
-      `INSERT INTO user (name, nickname, email, password, role, gender, date, address, point, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-      [
-        userData.name, 
-        userData.nickname, 
-        userData.email, 
-        userData.password,
-        userData.role || 'USER', 
-        userData.gender, 
-        userData.date, 
-        userData.address,
-        userData.point || 0,
-        userData.created_at, 
-        userData.updated_at
-      ]
-    );
-    return result.insertId; 
-  } finally { 
-    conn.release(); 
+  console.log('Received userData:', userData); // <-- 이 로그를 추가하여 user_id 필드 유무 및 값 확인
+  const { user_id, ...dataToCreate } = userData;
+  console.log('Data to be created:', dataToCreate);
+
+  const user = await prisma.user.findFirst({
+    where: { email: dataToCreate.email }
+  });
+
+  if (user) {
+    return null;
   }
+
+  const created = await prisma.user.create({ data: dataToCreate });
+  return created.user_id;
+
 };
 
 // 2-1. 유저 조회 (user_id)

@@ -3,7 +3,7 @@
 import * as UserRepository from '../repositories/user.repository.js';
 import * as UserPhoneRepository from '../repositories/userPhone.repository.js'; // user_phone 레포지토리 추가
 import { responseFromUser } from "../dtos/user.dto.js"; // DTO import
-
+import bcrypt from 'bcrypt';
 /**
  * 💡 수정된 userSignUp (Service)
  * Controller에서 분리된 DTO를 인자로 받음으로써 Service의 관심사를 명확히 합니다.

@@ -7,3 +7,4 @@ node_modules/
 
 # 기타 파일
 .DS_Store
+/src/generated/prisma
