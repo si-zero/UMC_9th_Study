@@ -28,3 +28,9 @@ export const getReviewsByStoreIdService = async (store_id) => {
     
     return responseFromReviewList(reviewList);
 };
+
+// repository 호출 및 DTO 변환 후 반환
+export const listStoreReviews = async (storeId) => {
+  const reviews = await getAllStoreReviews(storeId);
+  return responseFromReviews(reviews);
+};

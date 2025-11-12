@@ -33,3 +33,12 @@ export const responseFromReviewList = (reviewList) => {
   // 각 배열을 모두 순회하여 배열값마다 responseFromReview 적용
   return reviewList.map(review => responseFromReview(review)).filter(r => r !== null);
 };
+
+export const responseFromReviews = (reviews) => {
+  return {
+    data: reviews,
+    pagination: {
+      cursor: reviews.length ? reviews[reviews.length - 1].id : null,
+    },
+  };
+};
