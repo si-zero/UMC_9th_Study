@@ -13,29 +13,103 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 1. 유저 테이블
 model User {
-  // 1. 기본 키
-  user_id     BigInt   @id @default(autoincrement()) @map("user_id")
+  // 기본 키
+  userId        BigInt    @id @default(autoincrement()) @map("user_id")
 
-  // 2. 인증 정보 (NOT NULL 및 해싱 길이 반영)
-  email       String   @unique @db.VarChar(100)
-  password    String   @db.VarChar(100)
+  // 사용자 정보
+  name          String?   @db.VarChar(10)
+  nickname      String?   @db.VarChar(20)
+  email         String?   @db.VarChar(30)
+  password      String    @db.VarChar(100) // 필수 필드
+  role          String?   @db.VarChar(20)
+  point         Int?
+  gender        String?   @db.VarChar(10)
+  date          DateTime? @db.Date // SQL DATE는 Prisma에서 DateTime 타입으로 매핑 후 @db.Date로 지정
+  address       String?   @db.VarChar(30)
 
-  // 3. 사용자 정보
-  name        String?  @db.VarChar(50)
-  nickname    String?  @db.VarChar(50)
-  role        String?  @db.VarChar(10) @default("USER")
-  point       Int?     @default(0)
+  // 타임스탬프
+  createdAt     DateTime? @map("created_at") @default(now())
+  updatedAt     DateTime? @map("updated_at") @updatedAt
 
-  gender      String?  @db.VarChar(3)
-  date        DateTime? @db.Date
-  address     String?  @db.VarChar(255)
+  // 관계 (Relations)
+  phone         UserPhone? // 1:1 관계
+  images        UserImage[] // 1:N 관계
+  termsChecks   UserTermsOfCondition[] // N:M 관계
+
+  @@map("user") // DB 테이블 이름 지정
+}
 
 
-  // 4. 타임스탬프
-  created_at  DateTime? @db.DateTime(0)
-  updated_at  DateTime? @db.DateTime(0)
+// 2. 유저 핸드폰 테이블
+model UserPhone {
+  // 기본 키 및 외래 키
+  userId        BigInt    @id @map("user_id")
 
-  // 테이블 이름 매핑
-  @@map("user")
+  // 전화번호 정보
+  phoneNumber   String?   @db.VarChar(20) @map("phone_number")
+  status        String?   @db.VarChar(20)
+
+  // 관계 설정: User와 1:1 매핑
+  user          User      @relation(fields: [userId], references: [userId])
+
+  @@map("user_phone")
+}
+
+// 3. 유저 이미지
+model UserImage {
+  // 기본 키
+  userImageId   BigInt    @id @default(autoincrement()) @map("user_image_id")
+
+  // 외래 키
+  userId        BigInt    @map("user_id")
+  imageUrl      String?   @db.VarChar(100) @map("image_url")
+  uploadedAt    DateTime? @map("uploaded_at")
+
+  // 관계 설정: User와 연결
+  user          User      @relation(fields: [userId], references: [userId])
+
+  @@map("user_image")
+}
+
+// 4. 이용약관
+model TermsOfCondition {
+  // 기본 키
+  tremsId       BigInt    @id @default(autoincrement()) @map("trems_id")
+
+  // 약관 정보
+  name          String?   @db.VarChar(20)
+  content       String?   @db.VarChar(50)
+  optional      Boolean?
+  
+  // 타임스탬프
+  createdAt     DateTime? @map("created_at") @default(now())
+  updatedAt     DateTime? @map("updated_at") @updatedAt
+
+  // 관계 (Relations)
+  userChecks    UserTermsOfCondition[] // N:M 관계
+
+  @@map("termsOfCondition")
+}
+
+// 5. 사용자 약관 동의
+model UserTermsOfCondition {
+  // 기본 키
+  checkId       BigInt    @id @default(autoincrement()) @map("check_id")
+
+  // 외래 키
+  userId        BigInt    @map("user_id")
+  tremsId       BigInt    @map("trems_id")
+
+  // 타임스탬프
+  createdAt     DateTime? @map("created_at") @default(now())
+  updatedAt     DateTime? @map("updated_at") @updatedAt
+
+  // 관계 설정
+  user          User      @relation(fields: [userId], references: [userId])
+  terms         TermsOfCondition @relation(fields: [tremsId], references: [tremsId])
+
+  @@map("user_termsOfCondition")
+  @@unique([userId, tremsId]) // 사용자가 특정 약관에 한 번만 동의하도록 복합 고유 키 설정 (선택 사항)
 }
