@@ -34,8 +34,6 @@ export const userSignUp = async (userDTO, userPhoneDTO) => {
     ...userDTO, // Controller에서 이미 password, email 등을 가지고 넘어옴
     role: userDTO.role || 'USER', 
     point: userDTO.point || 0,
-    created_at: now,
-    updated_at: now
     // password는 Controller에서 해싱되었거나, 여기서 해싱 로직이 추가되어야 함
   };
   
@@ -91,3 +89,15 @@ export const userLogin = async (email, password) => {
     // 3. 검증 성공, 로그인 처리 (세션/토큰 생성 등)
     return user; 
 };
+
+export const getUserByUserIdService = async (user_id) => {
+    const user = await UserRepository.findUserById(user_id);
+
+    return user;
+}
+
+export const getUserByEmailService = async (email) => {
+    const user = await UserRepository.findUserByEmail(email);
+
+    return user;
+}
