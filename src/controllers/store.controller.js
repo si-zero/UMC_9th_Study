@@ -3,8 +3,9 @@ import * as storeService from "../services/store.service.js";
 
 // POST /store
 export const createStoreController = async (req, res) => {
+  let newStore;
   try {
-    const newStore = await storeService.createStoreService(req.body);
+    newStore = await storeService.createStoreService(req.body);
     res.status(201).json({
       message: "가게가 성공적으로 추가되었습니다.",
       data: newStore,
