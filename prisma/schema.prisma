@@ -113,3 +113,189 @@ model UserTermsOfCondition {
   @@map("user_termsOfCondition")
   @@unique([userId, tremsId]) // 사용자가 특정 약관에 한 번만 동의하도록 복합 고유 키 설정 (선택 사항)
 }
+
+  // 6. 미션
+  model Mission {
+    missionId     BigInt    @id @default(autoincrement()) @map("mission_id")
+    title         String?   @db.VarChar(20)
+    content       String?   @db.VarChar(50)
+    createdAt     DateTime? @map("created_at") @default(now())
+    updatedAt     DateTime? @map("updated_at") @updatedAt
+    rewardPoints  Int?      @map("reward_points")
+    
+    users         UserMission[]
+
+    @@map("mission")
+  }
+
+// 7. 보너스 미션 테이블
+model BonusMission {
+  bonusMissionId  BigInt    @id @default(autoincrement()) @map("bonus_mission_id")
+  title           String?   @db.VarChar(10)
+  description     String?   @db.VarChar(30)
+  requiredCount   Int?      @map("required_count")
+  rewardPoints    Int?      @map("reward_points")
+
+  @@map("bonus_mission")
+}
+
+// 8. 사용자 미션 진행 테이블 (N:M 연결)
+model UserMission {
+  userMissionId BigInt    @id @default(autoincrement()) @map("user_mission_id")
+  userId        BigInt    @map("user_id")
+  missionId     BigInt    @map("mission_id")
+  status        String?   @db.VarChar(20)
+  createdAt     DateTime? @map("created_at") @default(now())
+  updatedAt     DateTime? @map("updated_at") @updatedAt
+
+  // user          User      @relation(fields: [userId], references: [userId]) // User 모델이 없으므로 주석 처리
+  mission       Mission   @relation(fields: [missionId], references: [missionId]) // Mission 모델이 없으므로 주석 처리
+
+  @@map("user_mission")
+}
+
+// 9. 음식 카테고리
+model FoodCategory {
+  categoryId    BigInt    @id @default(autoincrement()) @map("category_id")
+  name          String?   @db.VarChar(20)
+  
+  favorites     FavoriteFood[]
+
+  @@map("food_category")
+}
+
+// 10. 선호 음식 테이블 (N:M 연결)
+model FavoriteFood {
+  favoriteId    BigInt    @id @default(autoincrement()) @map("favorite_id")
+  categoryId    BigInt    @map("category_id")
+  userId        BigInt    @map("user_id")
+  createdAt     DateTime? @map("created_at") @default(now())
+  updatedAt     DateTime? @map("updated_at") @updatedAt
+  
+  category      FoodCategory @relation(fields: [categoryId], references: [categoryId]) // FoodCategory 모델이 없으므로 주석 처리
+  // user          User         @relation(fields: [userId], references: [userId]) // User 모델이 없으므로 주석 처리
+
+  @@map("favorite_food")
+}
+
+
+// 11. 지역 테이블
+model Regions {
+  regionsId     BigInt    @id @default(autoincrement()) @map("regions_id")
+  name          String?   @db.VarChar(20)
+
+  // 관계
+  stores        Store[]
+
+  @@map("regions")
+}
+
+// 12. 가게 정보
+model Store {
+  storeId       BigInt    @id @default(autoincrement()) @map("store_id")
+  regionsId     BigInt    @map("regions_id")
+  name          String?   @db.VarChar(20)
+  lat           Decimal?    @db.Decimal(10, 8)
+  lng           Decimal?    @db.Decimal(11, 8)
+  createdAt     DateTime? @map("created_at") @default(now())
+  updatedAt     DateTime? @map("updated_at") @updatedAt
+  
+  // 관계
+  region        Regions   @relation(fields: [regionsId], references: [regionsId])
+  rating        ShopRating? // 1:1 관계
+  images        StoreImage[] // 1:N 관계
+  reviews       Review[] // 1:N 관계
+
+  @@map("store")
+}
+
+// 13. 가게 평점 정보 (1:1 관계)
+model ShopRating {
+  storeId       BigInt    @id @map("store_id")
+  averageRating Float?    @map("average_rating")
+  reviewCount   Int?      @map("review_count")
+  updatedAt     DateTime? @map("updated_at") @updatedAt
+  
+  // 관계 설정
+  store         Store     @relation(fields: [storeId], references: [storeId])
+
+  @@map("shop_rating")
+}
+
+// 14. 가게 이미지
+model StoreImage {
+  storeImageId  BigInt    @id @default(autoincrement()) @map("store_image_id")
+  storeId       BigInt    @map("store_id")
+  imageUrl      String?   @db.VarChar(50) @map("image_url")
+  uploadedAt    DateTime? @map("uploaded_at")
+  
+  // 관계 설정
+  store         Store     @relation(fields: [storeId], references: [storeId])
+
+  @@map("store_image")
+}
+
+// 15. 리뷰
+model Review {
+  reviewId      BigInt    @id @default(autoincrement()) @map("review_id")
+  userId        BigInt    @map("user_id")
+  storeId       BigInt    @map("store_id")
+  title         String?   @db.VarChar(10)
+  content       String?   @db.VarChar(50)
+  asterion      Float?    // 별점
+  createdAt     DateTime? @map("created_at") @default(now())
+  updatedAt     DateTime? @map("updated_at") @updatedAt
+  
+  // 관계
+  // user          User      @relation(fields: [userId], references: [userId]) // User 모델이 없으므로 주석 처리
+  store         Store     @relation(fields: [storeId], references: [storeId])
+  images        ReviewImage[] // 1:N 관계
+  comments      ReviewComment[] // 1:N 관계
+
+  @@map("review")
+}
+
+// 16. 리뷰 이미지
+model ReviewImage {
+  reviewImageId BigInt    @id @default(autoincrement()) @map("review_image_id")
+  reviewId      BigInt    @map("review_id")
+  imageUrl      String?   @db.VarChar(50) @map("image_url")
+  uploadedAt    DateTime? @map("uploaded_at")
+  
+  // 관계 설정
+  review        Review    @relation(fields: [reviewId], references: [reviewId])
+
+  @@map("review_image")
+}
+
+// 17. 리뷰 댓글
+model ReviewComment {
+  commentId     BigInt    @id @default(autoincrement()) @map("comment_id")
+  userId        BigInt    @map("user_id")
+  reviewId      BigInt    @map("review_id")
+  content       String?   @db.VarChar(30)
+  createdAt     DateTime? @map("created_at") @default(now())
+  updatedAt     DateTime? @map("updated_at") @updatedAt
+  
+  // 관계 설정
+  // user          User      @relation(fields: [userId], references: [userId]) // User 모델이 없으므로 주석 처리
+  review        Review    @relation(fields: [reviewId], references: [reviewId])
+
+  @@map("review_comment")
+}
+
+// 18. 문의
+model Inquiry {
+  inquiryId     BigInt    @id @default(autoincrement()) @map("inquiry_id")
+  userId        BigInt    @map("user_id")
+  title         String?   @db.VarChar(10)
+  content       String?   @db.VarChar(50)
+  status        String?   @db.VarChar(20)
+  createdAt     DateTime? @map("created_at") @default(now())
+  updatedAt     DateTime? @map("updated_at") @updatedAt
+  
+  // 관계 설정
+  // user          User      @relation(fields: [userId], references: [userId]) // User 모델이 없으므로 주석 처리
+
+  @@map("inquiry")
+}

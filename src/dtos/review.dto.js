@@ -1,13 +1,11 @@
 // ✅ 1. 리뷰 생성
 export const bodyToReview = (body) => {
   return {
-    user_id: body.user_id,
-    store_id: body.store_id,
+    userId: body.user_id,
+    storeId: body.store_id,
     title: body.title || null, // VARCHAR(10)
     content: body.content || null, // VARCHAR(50)
     asterion: body.asterion || null, // FLOAT (별점)
-    created_at: new Date(),
-    updated_at: new Date()
   };
 };
 

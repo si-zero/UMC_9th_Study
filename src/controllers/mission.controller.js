@@ -16,8 +16,25 @@ export const createMissionController = async (req, res) => {
         return res.status(400).json({ error: err.message });
     }
     res.status(500).json({ error: "미션 생성 중 서버 오류가 발생했습니다." });
+    console.log(err);
   }
 };
+
+// GET /mission/:missionId
+// 미션 단일 조회
+export const getMissionByMissionIdController = async (req, res) => {
+  try {
+
+    const mission = await missionService.getMissionByMissionIdService(req.params.missionId);
+    res.status(200).json({
+      message: "미션 조회 성공",
+      data: mission,
+    });
+
+  } catch (err) {
+    res.status(404).json({ error: err.message });
+  }
+}
 
 // GET /missions
 // 미션 목록 조회

@@ -7,12 +7,8 @@ export const createReviewService = async (body) => {
   const reviewData = bodyToReview(body);
   const store = await findStoreById(reviewData.store_id);
   if (!store) throw new Error("존재하지 않는 가게에는 리뷰를 작성할 수 없습니다.");
-
-  const reviewId = await createReview(reviewData);
-  
-  const newReview = await findReviewById(reviewId);
-  
-  return responseFromReview(newReview);
+  const review = await createReview(reviewData);
+  return review;
 };
 
 // 가게 ID를 이용해 리뷰 목록 조회
