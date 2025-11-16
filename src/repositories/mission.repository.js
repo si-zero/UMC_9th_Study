@@ -1,61 +1,45 @@
 import { db } from "../db.config.js"; // 가정: DB 연결 설정
+import { prisma } from "../db.config.js";
 
 // 미션 생성
 export const createMission = async (missionData) => {
-  const conn = await db.getConnection();
-  try {
-    const [result] = await conn.query(
-      `INSERT INTO mission (title, content, reward_points, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?);`,
-      [
-        missionData.title,
-        missionData.content,
-        missionData.reward_points,
-        missionData.created_at,
-        missionData.updated_at
-      ]
-    );
-    return result.insertId; // 새로 추가된 mission_id 반환
-
-  } catch (err) {
-    console.error("SQL 에러 상세:", err.sqlMessage); 
-    throw new Error(`미션 추가 중 오류 발생: ${err.message}`);
-
-  } finally {
-    conn.release();
-  }
+  const result = await prisma.mission.create({
+    data: missionData
+  })
 };
 
 // 미션 단일 조회
 export const findMissionById = async (mission_id) => {
-  const conn = await db.getConnection();
+  let mission;
   try {
-    const [rows] = await conn.query(`SELECT * FROM mission WHERE mission_id = ?;`, [mission_id]);
-
-    if (rows.length === 0) {
-      return null;
-    }
-    return rows[0];
-
+    mission = await prisma.mission.findFirstOrThrow({ where: { missionId: mission_id } });
+    return mission;
   } catch (err) {
-    throw new Error(`미션 단일 조회 중 오류 발생: ${err.message}`);
-
-  } finally {
-    conn.release();
+    console.log(mission);
+    console.log(err);
   }
+  
 };
 
 // 미션 목록 조회
 export const findAllMissions = async () => {
-  const conn = await db.getConnection();
   try {
-    const [rows] = await conn.query(`SELECT * FROM mission ORDER BY created_at DESC;`);
-    return rows; 
+    const missions = await prisma.mission.findMany({
+      // 1. 모든 미션 레코드를 찾습니다 (SELECT * FROM mission)
+      
+      // 2. 정렬 순서를 지정합니다 (ORDER BY created_at DESC)
+      orderBy: {
+        createdAt: 'desc', // 스키마에 정의된 카멜 케이스 필드명 사용
+      },
+      
+    });
+    
+    // 3. 조회된 미션 목록 (배열) 반환
+    return missions; 
 
-  } catch (err) {
-    throw new Error(`미션 목록 조회 중 오류 발생: ${err.message}`);
-
-  } finally {
-    conn.release();
+  } catch (error) {
+    console.error("[Prisma Repository Error] findAllMissions:", error);
+    
+    throw new Error("미션 목록을 조회하는 중 오류가 발생했습니다.");
   }
 };

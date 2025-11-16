@@ -10,8 +10,6 @@ export const requestToUser = (body) => {
     email: body.email,
     gender: body.gender,
     date,
-    created_at: new Date(),
-    updated_at: new Date(),
 
     // 선택
     nickname: body.nickname || body.name,

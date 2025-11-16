@@ -1,31 +1,23 @@
 import { db } from "../db.config.js";
+import { prisma } from "../db.config.js";
+
+export const getAllStoreReviews = async (storeId) => {
+  const reviews = await prisma.userStoreReview.findMany({
+    select: { id: true, content: true, store: true, user: true },
+    where: { storeId: storeId, id: { gt: cursor } },
+    orderBy: { id: "asc" },
+    take: 5,
+  });
+
+  return reviews;
+};
 
 // 리뷰 생성
 export const createReview = async (reviewData) => {
-  const conn = await db.getConnection();
-  try {
-    const [result] = await conn.query(
-      `INSERT INTO review (user_id, store_id, title, content, asterion, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?);`,
-      [
-        reviewData.user_id,
-        reviewData.store_id,
-        reviewData.title,
-        reviewData.content,
-        reviewData.asterion,
-        reviewData.created_at,
-        reviewData.updated_at
-      ]
-    );
-    return result.insertId; // 새로 추가된 review_id 반환
-
-  } catch (err) {
-    console.error("SQL 에러 상세:", err.sqlMessage); 
-    throw new Error(`리뷰 추가 중 오류 발생: ${err.message}`);
-
-  } finally {
-    conn.release();
-  }
+  const review = await prisma.review.create ({
+    data: reviewData
+  })
+  return review;
 };
 
 // 리뷰 단일 조회
@@ -48,16 +40,19 @@ export const findReviewById = async (review_id) => {
 };
 
 // 리뷰 목록 조회
-export const findReviewsByStoreId = async (store_id) => {
-  const conn = await db.getConnection();
+export const findReviewsByStoreId = async (storeId) => {
   try {
-    const [rows] = await conn.query(`SELECT * FROM review WHERE store_id = ? ORDER BY created_at DESC;`, [store_id]);
-    return rows; 
+    const reviews = await prisma.review.findMany({
+      where: {
+        storeId: BigInt(storeId)
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+    return reviews;
 
   } catch (err) {
     throw new Error(`가게 리뷰 목록 조회 중 오류 발생: ${err.message}`);
-
-  } finally {
-    conn.release();
   }
 };
