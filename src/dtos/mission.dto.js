@@ -3,9 +3,7 @@ export const bodyToMission = (body) => {
   return {
     title: body.title || null,    // VARCHAR(20)
     content: body.content || null,  // VARCHAR(50)
-    reward_points: body.reward_points || 0, // INT
-    created_at: new Date(),
-    updated_at: new Date()
+    rewardPoints: body.reward_points || 0, // INT
   };
 };
 

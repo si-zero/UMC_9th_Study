@@ -7,7 +7,6 @@ export const createReviewController = async (req, res) => {
     const storeId = parseInt(req.params.storeId, 10);
     
     const reviewBody = { ...req.body, store_id: storeId };
-
     const newReview = await reviewService.createReviewService(reviewBody);
     
     res.status(201).json({
@@ -15,6 +14,7 @@ export const createReviewController = async (req, res) => {
       data: newReview,
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: "리뷰 작성 중 서버 오류가 발생했습니다." });
   }
 };

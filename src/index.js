@@ -6,7 +6,7 @@ import morgan from 'morgan';
 import { createUser, getUser, getUserByEmail } from "./controllers/user.controller.js";
 import { getStoreController, createStoreController } from "./controllers/store.controller.js";
 import { getReviewsController, createReviewController } from "./controllers/review.controller.js";
-import { createMissionController, getMissionsController } from "./controllers/mission.controller.js";
+import { getMissionByMissionIdController ,createMissionController, getMissionsController } from "./controllers/mission.controller.js";
 import { addUserMissionController, updateUserMissionStatusController } from "./controllers/userMission.controller.js";
 
 dotenv.config();
@@ -67,6 +67,11 @@ BigInt.prototype.toJSON = function() {
   return this.toString(); 
 };
 
+BigInt.prototype.toJSON = function() {
+  // 'n' 접미사를 제외하고 문자열로 반환
+  return this.toString(); 
+};
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
@@ -85,6 +90,7 @@ app.get("/api/v1/stores/:storeId/reviews", getReviewsController);
 
 // 미션 생성 및 조회
 app.post("/api/v1/missions", createMissionController);
+app.get("/api/v1/mission/:missionId", getMissionByMissionIdController)
 app.get("/api/v1/missions", getMissionsController);
 
 // 사용자 미션 생성 및 업데이트

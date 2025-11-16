@@ -22,3 +22,13 @@ export const responseFromStore = (store) => {
     regions_id: store.regions_id
   };
 };
+
+export const requestToStore = (body) => {
+  return {
+    regionsId: body.regionsId,
+    name: body.name,
+    lat: body.lat,
+    lng: body.lng,
+  }
+  
+}
