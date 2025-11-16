@@ -1,29 +1,31 @@
-import { db } from "../db.config.js";
+// user.repository.js (수정됨)
+// 💡 db import 제거
+
 import { prisma } from "../db.config.js";
 
-// 1. 유저 생성
+// 1. 유저 생성 (단순 CRUD)
 export const createUser = async (data) => {
-  const user = await prisma.user.findFirst({ where: { email: data.email } });
-  if (user) {
-    return null;
-  }
-
-  const created= await prisma.user.create({ data: data });
-  return created.userId;
+  // 중복 검사 로직 제거, 오직 생성만 담당
+  const created = await prisma.user.create({ data: data });
+  // BigInt를 처리하는 .toJSON()이 있으므로, 객체 자체를 반환해도 됨
+  return created; 
 };
 
 // 2-1. 유저 조회 (user_id)
 export const findUserById = async (user_id) => {
-  const user = prisma.user.findFirstOrThrow({ where: { userId: user_id } });
-  return user;
+  // 💡 await 추가 및 findFirstOrThrow 대신 findFirst 사용
+  const user = await prisma.user.findFirst({ 
+    where: { userId: BigInt(user_id) } // BigInt 변환 (Controller에서 문자열로 넘어왔다면)
+  });
+  return user; // 없으면 null 반환
 };
 
 // 2-2. 유저 조회 (email)
 export const findUserByEmail = async (email) => {
-  const user = prisma.user.findFirstOrThrow({ where: { email: email } });
-  return user;
+  // 💡 await 추가 및 findFirstOrThrow 대신 findFirst 사용
+  const user = await prisma.user.findFirst({ where: { email: email } });
+  return user; // 없으면 null 반환
 };
-
 
 // 3. 포은티 업데아트
 /**

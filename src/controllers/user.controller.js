@@ -4,41 +4,23 @@ import * as UserRepository from '../repositories/user.repository.js';
 import { requestToUser, requestToUserPhone } from '../dtos/user.dto.js';
 
 // ✅ 1. POST /api/v1/users (사용자 생성/회원가입)
-export const createUser = async (req, res) => {
+export const createUser = async (req, res, next) => { // next 인수를 받도록 수정
     try {
-        // 1. DTO 변환 및 데이터 분리 (생략 가능)
         const userDTO = requestToUser(req.body);
         const userPhoneDTO = requestToUserPhone(req.body);
 
-        // 2. Service 로직 호출
-        // finalResponse는 생성된 사용자 객체를 담고 있습니다.
         const finalResponse = await UserService.userSignUp(userDTO, userPhoneDTO);
 
-        // 3. 응답 (수정됨: 201 Created 사용 및 변수명 수정)
-        // 응답 코드를 201(Created)로 변경하고, 정의된 변수 finalResponse를 사용합니다.
-        // *주의: .success()는 프레임워크에 정의된 커스텀 함수일 수 있습니다.
-        //          표준 Express 응답은 .send()나 .json()입니다.
-        res.status(201).json({
-            message: "사용자 생성이 성공적으로 완료되었습니다.",
-            data: finalResponse
+        // ✅ 성공 시: res.success() 헬퍼를 사용하는 것이 좋습니다.
+        return res.status(201).success({ 
+             message: "사용자 생성이 성공적으로 완료되었습니다.",
+             data: finalResponse
         });
 
     } catch (error) {
-        // 4. 에러 처리 (Service에서 던져진 에러를 HTTP 상태 코드로 변환)
-        
-        // 에러를 좀 더 체계적으로 분류
-        if (error.message.includes("필수")) {
-             return res.status(400).json({ message: "요청 데이터 오류: " + error.message }); // Bad Request
-        }
-        if (error.message.includes("사용 중인 이메일")) {
-             return res.status(409).json({ message: error.message }); // Conflict (자원 충돌)
-        }
-        
-        // 그 외 예상치 못한 모든 서버 오류
-        return res.status(500).json({ 
-            message: "서버 오류로 인해 사용자 생성에 실패했습니다.", 
-            error: error.message 
-        });
+        // 💡 모든 에러 처리를 전역 미들웨어에 위임합니다.
+        // DuplicateUserEmailError 객체는 statusCode와 errorCode를 포함한 채로 전달됩니다.
+        next(error); 
     }
 };
 
@@ -51,7 +33,7 @@ export const getUser = async (req, res) => {
         const finalResponse = await UserService.getUserByUserIdService(userId);
         
         // 2. 성공 응답
-        return res.status(200).json(finalResponse);
+        return res.success({ finalResponse });
 
     } catch (error) {
         // 3. 에러 처리
