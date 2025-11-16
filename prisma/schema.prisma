@@ -114,19 +114,19 @@ model UserTermsOfCondition {
   @@unique([userId, tremsId]) // 사용자가 특정 약관에 한 번만 동의하도록 복합 고유 키 설정 (선택 사항)
 }
 
-// 6. 미션
-model Mission {
-  missionId     BigInt    @id @default(autoincrement()) @map("mission_id")
-  title         String?   @db.VarChar(20)
-  content       String?   @db.VarChar(50)
-  createdAt     DateTime? @map("created_at") @default(now())
-  updatedAt     DateTime? @map("updated_at") @updatedAt
-  rewardPoints  Int?      @map("reward_points")
-  
-  users         UserMission[]
+  // 6. 미션
+  model Mission {
+    missionId     BigInt    @id @default(autoincrement()) @map("mission_id")
+    title         String?   @db.VarChar(20)
+    content       String?   @db.VarChar(50)
+    createdAt     DateTime? @map("created_at") @default(now())
+    updatedAt     DateTime? @map("updated_at") @updatedAt
+    rewardPoints  Int?      @map("reward_points")
+    
+    users         UserMission[]
 
-  @@map("mission")
-}
+    @@map("mission")
+  }
 
 // 7. 보너스 미션 테이블
 model BonusMission {
