@@ -110,8 +110,9 @@ export const getUserByUserIdService = async (user_id) => {
     
     // 💡 유저가 없으면, ResourceNotFoundError를 던집니다.
     if (!user) {
+        console.log("오류");
         // ResourceNotFoundError는 statusCode 404를 가집니다.
-        throw new ResourceNotFoundError(`사용자 ID ${user_id}를 찾을 수 없습니다.`);
+        throw new ResourceNotFoundError(`사용자 ID ${user_id}를 찾을 수 없습니다.`, user_id);
     }
 
     return user;

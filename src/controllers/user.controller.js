@@ -25,7 +25,7 @@ export const createUser = async (req, res, next) => { // next 인수를 받도�
 };
 
 // ✅ 2. GET /api/v1/users/:user_id (사용자 조회)
-export const getUser = async (req, res) => {
+export const getUser = async (req, res, next) => {
     try {
         const userId = parseInt(req.params.user_id);
 
@@ -36,11 +36,9 @@ export const getUser = async (req, res) => {
         return res.success({ finalResponse });
 
     } catch (error) {
-        // 3. 에러 처리
-        if (error.message.includes("존재하지 않는 사용자")) {
-            return res.status(404).json({ message: error.message }); // Not Found
-        }
-        return res.status(500).json({ message: "Server error during fetching user data.", error: error.message });
+        // 💡 모든 에러 처리를 전역 미들웨어에 위임합니다.
+        // DuplicateUserEmailError 객체는 statusCode와 errorCode를 포함한 채로 전달됩니다.
+        next(error); 
     }
 };
 
@@ -62,12 +60,8 @@ export const getUserByEmail = async (req, res) => {
         });
 
     } catch (error) {
-        // Prisma.findFirstOrThrow()는 데이터가 없을 경우 에러를 던집니다.
-        // 예외 처리 로직 추가 필요
-        console.error(error);
-        return res.status(500).json({ 
-            message: "사용자 조회 중 서버 오류 발생", 
-            error: error.message 
-        });
+        // 💡 모든 에러 처리를 전역 미들웨어에 위임합니다.
+        // DuplicateUserEmailError 객체는 statusCode와 errorCode를 포함한 채로 전달됩니다.
+        next(error); 
     }
 };
