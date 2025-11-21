@@ -3,6 +3,9 @@ import express from "express";
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+// Swagger 관련 라이브러리
+import swaggerAutogen from "swagger-autogen"; // Express의 라우터 코드에서 Swagger 문서를 자동으로 생성하는 라이브러리
+import swaggerUiExpress from "swagger-ui-express"; // Express의 라우터 코드에서 Swagger 문서를 자동으로 생성하는 라이브러리
 import { createUser, getUser, getUserByEmail } from "./controllers/user.controller.js";
 import { getStoreController, createStoreController } from "./controllers/store.controller.js";
 import { getReviewsController, createReviewController } from "./controllers/review.controller.js";
@@ -31,6 +34,37 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(
+  "/docs",
+  swaggerUiExpress.serve,
+  swaggerUiExpress.setup({}, {
+    swaggerOptions: {
+      url: "/openapi.json",
+    },
+  })
+);
+
+app.get("/openapi.json", async (req, res, next) => {
+  // #swagger.ignore = true
+  const options = {
+    openapi: "3.0.0",
+    disableLogs: true,
+    writeOutputFile: false,
+  };
+  const outputFile = "/dev/null"; // 파일 출력은 사용하지 않습니다.
+  const routes = ["./src/index.js"];
+  const doc = {
+    info: {
+      title: "UMC 9th",
+      description: "UMC 9th Node.js 테스트 프로젝트입니다.",
+    },
+    host: "localhost:3000",
+  };
+
+  const result = await swaggerAutogen(options)(outputFile, routes, doc);
+  res.json(result ? result.data : null);
+});
+
 app.use(cors());                            // cors 방식 허용
 app.use(express.static('public'));          // 정적 파일 접근
 app.use(express.json());                    // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
@@ -38,12 +72,9 @@ app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형
 app.use(morgan('dev')); // dev 의 로그 포맷 제공
 app.use(cookieParser()); // 쿠키 파싱(해석)해서 다루기 쉽게 만드는 미들웨어
 
-app.get('/test', (req, res) => {
-  res.send('Hello!');
-});
-
 // 쿠키 만드는 라우터 
 app.get('/setcookie', (req, res) => {
+    // #swagger.ignore = true
     // 'myCookie'라는 이름으로 'hello' 값을 가진 쿠키를 생성
     res.cookie('myCookie', 'hello', { maxAge: 60000 }); // 60초간 유효
     res.send('쿠키가 생성되었습니다!');
@@ -51,6 +82,7 @@ app.get('/setcookie', (req, res) => {
 
 // 쿠키 읽는 라우터 
 app.get('/getcookie', (req, res) => {
+    // #swagger.ignore = true
     // cookie-parser 덕분에 req.cookies 객체에서 바로 꺼내 쓸 수 있음
     const myCookie = req.cookies.myCookie; 
     
@@ -71,10 +103,6 @@ BigInt.prototype.toJSON = function() {
   // 'n' 접미사를 제외하고 문자열로 반환
   return this.toString(); 
 };
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
 
 app.post("/api/v1/users", createUser);
 app.get("/api/v1/users/:user_id", getUser);
