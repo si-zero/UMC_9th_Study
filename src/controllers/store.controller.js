@@ -2,7 +2,7 @@
 import * as storeService from "../services/store.service.js";
 
 // POST /store
-export const createStoreController = async (req, res) => {
+export const createStoreController = async (req, res, next) => {
   let newStore;
   try {
     newStore = await storeService.createStoreService(req.body);
@@ -11,12 +11,13 @@ export const createStoreController = async (req, res) => {
       data: newStore,
     });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    // 모든 에러 처리를 전역 미들웨어에 위임
+    next(error);
   }
 };
 
 // GET /store/:id
-export const getStoreController = async (req, res) => {
+export const getStoreController = async (req, res, next) => {
   try {
     const store = await storeService.getStoreService(req.params.id);
     res.status(200).json({
@@ -24,6 +25,6 @@ export const getStoreController = async (req, res) => {
       data: store,
     });
   } catch (err) {
-    res.status(404).json({ error: err.message });
+    next(err);
   }
 };
