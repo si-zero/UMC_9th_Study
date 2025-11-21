@@ -10,6 +10,6 @@ export const createStore = async (storeData) => {
 
 // 가게 정보 얻기
 export const findStoreById = async (store_id) => {
-  const store = await prisma.store.findFirstOrThrow({ where: { storeId: store_id } });
+  const store = await prisma.store.findFirst({ where: { storeId: store_id } });
   return store;
 };
