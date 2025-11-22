@@ -11,6 +11,7 @@ import { getStoreController, createStoreController } from "./controllers/store.c
 import { getReviewsController, createReviewController } from "./controllers/review.controller.js";
 import { getMissionByMissionIdController ,createMissionController, getMissionsController } from "./controllers/mission.controller.js";
 import { addUserMissionController, updateUserMissionStatusController } from "./controllers/userMission.controller.js";
+import users from './routes/userRoutes.js'
 
 dotenv.config();
 
@@ -104,9 +105,10 @@ BigInt.prototype.toJSON = function() {
   return this.toString(); 
 };
 
-app.post("/api/v1/users", createUser);
-app.get("/api/v1/users/:user_id", getUser);
-app.get("/api/v1/users", getUserByEmail);
+app.use('/api/v1/users', users);
+// app.post("/api/v1/users", createUser);
+// app.get("/api/v1/users/:user_id", getUser);
+// app.get("/api/v1/users", getUserByEmail);
 
 // 가게 생성 및 조회
 app.post("/api/v1/store", createStoreController);
