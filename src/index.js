@@ -3,6 +3,13 @@ import express from "express";
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+
+// Passport
+import passport from "passport";
+
+// Google
+import { googleStrategy, jwtStrategy } from "./auth.config.js";
+
 // Swagger 관련 라이브러리
 import swaggerAutogen from "swagger-autogen"; // Express의 라우터 코드에서 Swagger 문서를 자동으로 생성하는 라이브러리
 import swaggerUiExpress from "swagger-ui-express"; // Express의 라우터 코드에서 Swagger 문서를 자동으로 생성하는 라이브러리
@@ -14,6 +21,9 @@ import { addUserMissionController, updateUserMissionStatusController } from "./c
 import users from './routes/userRoutes.js'
 
 dotenv.config();
+
+passport.use(googleStrategy);
+passport.use(jwtStrategy);
 
 const app = express();
 const port = process.env.PORT;
@@ -73,6 +83,8 @@ app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형
 app.use(morgan('dev')); // dev 의 로그 포맷 제공
 app.use(cookieParser()); // 쿠키 파싱(해석)해서 다루기 쉽게 만드는 미들웨어
 
+app.use(passport.initialize());
+
 // 쿠키 만드는 라우터 
 app.get('/setcookie', (req, res) => {
     // #swagger.ignore = true
@@ -126,6 +138,42 @@ app.get("/api/v1/missions", getMissionsController);
 // 사용자 미션 생성 및 업데이트
 app.post('/api/v1/users/:userId/missions', addUserMissionController)
 app.patch('/api/v1/users/:userId/missions/:missionId', updateUserMissionStatusController)
+
+// 마이 페이지
+const isLogin = passport.authenticate('jwt', { session: false });
+
+app.get('/mypage', isLogin, (req, res) => {
+  res.status(200).success({
+    message: `인증 성공! ${req.user.name}님의 마이페이지입니다.`,
+    user: req.user,
+  });
+});
+
+// 소셜 로그인
+app.get("/oauth2/login/google", 
+  passport.authenticate("google", { 
+    session: false 
+  })
+);
+app.get(
+  "/oauth2/callback/google",
+  passport.authenticate("google", {
+	  session: false,
+    failureRedirect: "/login-failed",
+  }),
+  (req, res) => {
+    const tokens = req.user; 
+
+    res.status(200).json({
+      resultType: "SUCCESS",
+      error: null,
+      success: {
+          message: "Google 로그인 성공!",
+          tokens: tokens, // { "accessToken": "...", "refreshToken": "..." }
+      }
+    });
+  }
+);
 
 // 전역 오류 처리를 위한 미들웨어
 app.use((err, req, res, next) => {
